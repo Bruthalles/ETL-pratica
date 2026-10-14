@@ -1,0 +1,20 @@
+Objetivo do projeto- Obter identificadores de um arquivo, registrar usuários em um banco de dados com esses identificadores, e usar API do ChatGPT para criar uma frase personalizada para cada usuário.
+
+1- ler o arquivo csv com pandas e criar uma lista de identificadores
+
+2- criar um banco de dados com ID, nome, cartão, cpf, news e data de cadastro
+(news é o campo da frase personalizada)
+
+Fluxo de código no main.py:
+
+1- Inicia banco de dados e cria tabela vazia
+
+2- cria linhas objetos Usuario no código
+
+3- adiciona usuarios ao banco
+
+4- conecta na API lendo a chave do arquivo Envie
+
+5- cria função de gerar mensagem personalizada, fazendo uma requisição ao gpt, enviando um prompt para receber mensagem para o usuário.
+
+salva o conteudo em uma variavel para salvar a mensagem no banco de dados de acordo com o ID do usuario.
