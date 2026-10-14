@@ -5,12 +5,12 @@ import json,os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-bd = BancoDeDados()
+banco_dados = BancoDeDados()
 
 def iniciar_banco():
-    bd.conectar_banco()
-    bd.criar_tabela()
-    bd.fechar_conexao()
+    banco_dados.conectar_banco()
+    banco_dados.criar_tabela()
+    banco_dados.fechar_conexao()
 
 #ADICIONE NOVOS USUARIOS ABAIXO
 
@@ -23,23 +23,24 @@ criar_user(user1)
 criar_user(user2)
 criar_user(user3)
 
-df = pd.read_csv('user-id.csv')
-users_ids = df['UserID'].tolist()
+df_usuarios = pd.read_csv('user-id.csv')
+ids_usuarios = df_usuarios['UserID'].tolist()
 
 print("IDs dos usuarios no CSV: ")
-print(users_ids)
+print(ids_usuarios)
 
 #cria um dicionario apenas com usuarios validos no banco sem repeticao
 colunas = ['UserID', 'nome', 'cartao', 'cpf','news', 'data_cadastro']
-users_dict = {}
-for id in users_ids:
+usuarios_por_id = {}
+for id in ids_usuarios:
     user = obter_user_por_id(id)
     if user is not None:
-        users_dict[user[0]] = dict(zip(colunas, user))
-users = list(users_dict.values())
+        usuarios_por_id[user[0]] = dict(zip(colunas, user))
+
+usuarios_validos = list(usuarios_por_id.values())
 
 print("Usuarios validados no banco: ")
-print(json.dumps(users,indent=4))
+print(json.dumps(usuarios_validos,indent=4))
 
 #conectando API
 load_dotenv()
@@ -49,27 +50,20 @@ client = OpenAI(api_key = OPENAI_API_KEY)
 
 def gerar_mensagem_personalizada(user):
 
-    response = client.responses.create(
+    resposta_api = client.responses.create(
         model="gpt-5-nano",
         input=f"Envie uma frase filosófica de uma ou duas linhas para o usuario {user['nome']}",
         store=True,
     )
+    # salva somente a mensagem da resposta da API 
+    mensagem_gerada = resposta_api.output_text
+    
+    if not mensagem_gerada:
+        return "API Sem Resposta"
 
-    # valida:
-    output = getattr(response, "output", None)
-    if not output:
-        return ""
+    return mensagem_gerada.strip()
 
-    primeiro = output[0]
-    content = primeiro.get("content") if isinstance(primeiro, dict) else None
-    if not content:
-        return "Sem resposta"
-
-    fragmento = content[0]
-    texto = fragmento.get("text") if isinstance(fragmento, dict) else None
-    return (texto or "API sem resposta").strip()
-
-for user in users:
+for user in usuarios_validos:
     mensagem = gerar_mensagem_personalizada(user)
     print(mensagem)
     salvar_mensagem_usuario(user['UserID'], mensagem)
