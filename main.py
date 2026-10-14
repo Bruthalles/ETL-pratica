@@ -48,6 +48,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI(api_key = OPENAI_API_KEY)
 
+#mensagem temporária para teste sem API
+def gerar_mensagem_manual(user):
+    print(f"Mensagem para {user['nome']}")
+    return "Só sei que nada sei. - Sócrates"
+
 def gerar_mensagem_personalizada(user):
 
     resposta_api = client.responses.create(
@@ -57,13 +62,13 @@ def gerar_mensagem_personalizada(user):
     )
     # salva somente a mensagem da resposta da API 
     mensagem_gerada = resposta_api.output_text
-    
+
     if not mensagem_gerada:
         return "API Sem Resposta"
 
     return mensagem_gerada.strip()
 
 for user in usuarios_validos:
-    mensagem = gerar_mensagem_personalizada(user)
+    mensagem = gerar_mensagem_manual(user)
     print(mensagem)
     salvar_mensagem_usuario(user['UserID'], mensagem)
